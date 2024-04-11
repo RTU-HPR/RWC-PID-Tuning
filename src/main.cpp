@@ -20,9 +20,18 @@
 #define BNO_TICK_PERIOD 1000000 / BNO_TICK_FREQ - 1
 #define MOTOR_TICK_FREQ 200
 #define MOTOR_TICK_PERIOD 1000000 / MOTOR_TICK_FREQ - 1
-#define TELEM_FREQ 40
+#define TELEM_FREQ 10
 #define TELEM_TICK_PERIOD 1000 / TELEM_FREQ - 1
 #define PID_SWITCH_TRESHOLD 12.0f
+
+#define BNO_CALIBRATION_CHCK_FREQ 10
+#define BNO_CALIBRATION_CHCK_PERIOD 1000 / BNO_CALIBRATION_CHCK_FREQ - 1
+
+#define WHITE_LED 5
+#define GREEN_LED 6
+#define RED_LED 7
+
+uint64_t calibrationTick;
 
 struct PIDconf;
 #define PID_SETTINGS_EEPROM_SIZE 2 * sizeof(PIDconf)
@@ -346,13 +355,15 @@ void setup()
   pinMode(5, OUTPUT);
   digitalWrite(5, HIGH);
 
+  pinMode(RED_LED, OUTPUT);
+  pinMode(GREEN_LED, OUTPUT);
+
   Wire.setPins(48, 47);
 
   EEPROM.begin(PID_SETTINGS_EEPROM_SIZE);
   pointing = EEPROM.get(0, pointing);
   speed = EEPROM.get(sizeof(PIDconf), speed);
 
-  delay(5000);
   if (!bno.begin())
   {
     while (1)
@@ -431,4 +442,29 @@ void loop()
     convertData(buffer, target, currentPos, spid.setpoint, curSpeed);
     ws.textAll(buffer);
   }
+
+      if (millis() - calibrationTick > BNO_CALIBRATION_CHCK_PERIOD)
+    {
+        calibrationTick = millis();
+        uint8_t calibration[4];
+        bno.getCalibration(&calibration[0], &calibration[1], &calibration[2], &calibration[3]);
+
+        if (calibration[1] == 3)
+        {
+            digitalWrite(GREEN_LED, 1);
+        }
+        else
+        {
+            digitalWrite(GREEN_LED, 0);
+        }
+
+        if (calibration[3] == 3)
+        {
+            digitalWrite(RED_LED, 1);
+        }
+        else
+        {
+            digitalWrite(RED_LED, 0);
+        }
+    }
 }
