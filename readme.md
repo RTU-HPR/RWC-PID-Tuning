@@ -1,6 +1,6 @@
 # PID tuner for reaction wheel controller
 
-## Main requirements:
+## Main requirements
 - Be able to change & store PID controller values from the web interface.
 - Visualize the data from the RWC.
 
@@ -23,3 +23,7 @@ Actual vehicle configuration needs to be considered when selecting the gains:
 and stable. __Large D term can lead to instability!__
 - Speed controller benefits from higher I term. P term can be decreased by a small amount,
 raising the I term to compensate for it.  __Too large I term will lead to instability & oscillations!__ 
+
+## Notes & issues
+- Web interface and graphs in particular may become unstable or completely stop working.
+RWC restart may help. Other browsers (tested mostly in Firefox) may work better.
